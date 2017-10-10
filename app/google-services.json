@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "467183952498",
+    "firebase_url": "https://assetexplorer-dc982.firebaseio.com",
+    "project_id": "assetexplorer-dc982",
+    "storage_bucket": "assetexplorer-dc982.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:467183952498:android:2ef8ca53510e185f",
+        "android_client_info": {
+          "package_name": "com.assetexplorer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "467183952498-ma8gsv5rgegeprm8l9rka64q326dljfg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUlijwvO3buoKnKsrwlZNed2PZz40qDFg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
