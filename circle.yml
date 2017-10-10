@@ -1,49 +1,42 @@
-machine:
-  java:
-    version: openjdk7
-  environment:
-    ANDROID_HOME: /usr/local/android-sdk-linux
-    INFER_HOME: /home/ubuntu/.infer/infer-linux64-v0.1.0/infer/infer
-    PATH: $INFER_HOME/bin:$PATH
-dependencies:
-  cache_directories:
-    - ~/.gradle
-    - ~/.android
-    - ~/.infer
-  pre:
-    - |
-      mkdir -p ~/.infer
-      if [ ! -e ~/.infer/infer-linux64-v0.1.0/infer/infer/bin ]; then 
-        cd ~/.infer && wget https://github.com/facebook/infer/releases/download/v0.1.0/infer-linux64-v0.1.0.tar.xz
-        tar xf infer-linux64-v0.1.0.tar.xz
-        rm infer-linux64-v0.1.0.tar.xz
-      fi  
-      
-  override:
-    - echo y | android update sdk --no-ui --filter "android-22,build-tools-22.0.1"
-    - echo y | android update sdk --no-ui --all --filter "platform-tools, tools"
-    - echo y | android update sdk --no-ui --all --filter "android-22, build-tools-22.0.1"
-    - echo y | android update sdk --no-ui --all --filter "extra-android-m2repository"
-    - echo y | android update sdk --no-ui --all --filter "extra-android-support"
-test:
-  pre:
-    # start the emulator
-    - emulator -avd circleci-android22 -no-skin -no-audio -no-window -no-boot-anim:
-        background: true
-        parallel: true
-  override:
-  
-    # run infer
-    - ./gradlew clean
-    - infer -i -- ./gradlew build
-    # wait for it to have booted
-    - circle-android wait-for-boot
-    # run tests  against the emulator.
-    - ./gradlew connectedAndroidTest
-    # run lint checker
-    - lint app --html app/build/outputs/result.html
+#
+# Build configuration for Circle CI
+#
+general:
+    artifacts:
+        - /home/ubuntu/AndroidCI/app/build/outputs/apk/
 
-    # copy results
-    - cp -r app/build/outputs $CIRCLE_ARTIFACTS
-    - cp -r app/infer-out $CIRCLE_ARTIFACTS
-    - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
+machine:
+    environment:
+        ANDROID_HOME: /usr/local/android-sdk-linux
+        ADB_INSTALL_TIMEOUT: 60
+    java:
+        version: oraclejdk8
+
+dependencies:
+    pre:
+    #- mkdir "$ANDROID_HOME/licenses"
+    #- echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+    - if [ ! -e /usr/local/android-sdk-linux/build-tools/25.0.3 ]; then echo y | android update sdk --all --no-ui --filter "build-tools-26.0.1"; fi;
+    - if [ ! -e /usr/local/android-sdk-linux/platforms/android-25 ]; then echo y | android update sdk --all --no-ui --filter "android-26"; fi;
+    - if [ ! -e /usr/local/android-sdk-linux/extras/android/m2repository ]; then echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"; fi;
+    - chmod +x gradlew
+    cache_directories:
+     - /usr/local/android-sdk-linux/build-tools/25.0.3
+     - /usr/local/android-sdk-linux/platforms/android-25
+     - /usr/local/android-sdk-linux/extras/android/m2repository
+
+test:
+    override:
+        - (./gradlew assemble):
+            timeout: 360
+
+    post:
+      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+      #- git clone https://github.com/Sandip0Lawate/CircleCiDemo.git
+      #- cd CircleCiDemo/CircleCiDemo;ls;mvn clean package;mvn exec:java;
+#deployment:
+#  develop:
+#    branch: master
+#    commands:
+#      - "curl -F 'status=2' -F 'notify=0' -F 'ipa=@app/build/outputs/apk/app-debug.apk' -H 'X-HockeyAppToken: cf89c2a210774e6c8a9a8812252f8034' https://rink.hockeyapp.net/api/2/apps/68ead9d17c3942e781e8f3583ccb3f83/app_versions/upload"
+
